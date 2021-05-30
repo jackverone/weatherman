@@ -1,4 +1,4 @@
-package pl.sda;
+package pl.sda.weatherman.external.api.openweather.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
