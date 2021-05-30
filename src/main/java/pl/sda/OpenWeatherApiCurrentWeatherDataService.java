@@ -1,16 +1,23 @@
 package pl.sda;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.Call;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import pl.sda.weatherman.external.api.openweather.model.OpenWeatherApiCurrentWeatherDataResponse;
+
+import java.util.logging.Logger;
 
 public class OpenWeatherApiCurrentWeatherDataService {
+    private static final Logger LOGGER = Logger.getLogger(OpenWeatherApiCurrentWeatherDataService.class.getName());
+
     private static final String BASE_URL =
             "http://api.openweathermap.org/data/2.5/weather";
 
-    public String getCurrentWeather() {
+    public OpenWeatherApiCurrentWeatherDataResponse getCurrentWeather() {
         OkHttpClient client = new OkHttpClient();
 
         // przygotowanie URL z parametrami
@@ -29,8 +36,29 @@ public class OpenWeatherApiCurrentWeatherDataService {
         Call call = client.newCall(request);
         try {
             Response response = call.execute();
-            return response.body().string();
+            String responseString = response.body().string();
+
+            OpenWeatherApiCurrentWeatherDataResponse weatherDataResponse = deserializeResponse(responseString);
+
+            LOGGER.info("response: " + weatherDataResponse);
+            return weatherDataResponse;
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    OpenWeatherApiCurrentWeatherDataResponse deserializeResponse(String responseString) {
+        LOGGER.info("deserializeResponse(" + responseString + ")");
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            OpenWeatherApiCurrentWeatherDataResponse weatherDataResponse =
+                    objectMapper.readValue(responseString, OpenWeatherApiCurrentWeatherDataResponse.class);
+            LOGGER.info("weatherDataResponse: " + weatherDataResponse);
+            return weatherDataResponse;
+        } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
 
